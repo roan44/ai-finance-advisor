@@ -1,0 +1,32 @@
+# --- Frontend (Next.js) ---
+web/node_modules/
+web/.next/
+web/out/
+
+# --- If Node stuff accidentally exists at project root ---
+node_modules/
+.next/
+out/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# --- Backend (Python) ---
+api/__pycache__/
+api/*.pyc
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# --- Env files ---
+.env
+.env.*
+
+# --- Docker (optional if you map host dirs) ---
+db_data/
+redis_data/
+
+# --- OS / editor ---
+.DS_Store
+*.log
