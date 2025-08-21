@@ -30,3 +30,4 @@ redis_data/
 # --- OS / editor ---
 .DS_Store
 *.log
+.env

@@ -5,3 +5,5 @@ sqlalchemy
 psycopg[binary]
 redis
 python-dotenv
+alembic
+openai>=1.40.0

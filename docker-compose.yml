@@ -22,6 +22,8 @@ services:
   web:
     build: ./web
     env_file: .env
+    environment:
+      - NEXT_PUBLIC_API_BASE=${NEXT_PUBLIC_API_BASE}
     depends_on: [api]
     ports: ["3000:3000"]
     volumes: ["./web:/app"]
