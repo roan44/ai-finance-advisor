@@ -1,7 +1,7 @@
+import json  # Added missing import
 from typing import List, Optional, Dict, Any
 from openai import OpenAI
 from sqlalchemy.orm import Session
-
 
 from ai import _client, OPENAI_MODEL
 
@@ -41,19 +41,44 @@ def ai_make_advice(description: str, amount: float, merchant: Optional[str] = No
 
 def find_cheaper_alt(service: str, current_price: float) -> str:
     """
-    Ask AI if there are cheaper alternatives to a given recurring service.
+    Ask AI to find cheaper alternatives to any subscription service.
+    Enhanced to handle all types of subscriptions with Irish market knowledge.
     """
     prompt = f"""
-    The user is paying {current_price} EUR/month for {service}.
-    Suggest cheaper alternatives available in Europe in 2025,
-    if any, and include example monthly prices.
-    If none exist, just say "No known cheaper alternatives."
+    You are a financial advisor helping Irish consumers find cheaper alternatives to subscription services.
+    
+    Current service: {service}
+    Current monthly cost: €{current_price:.2f}
+    
+    Your task:
+    1. Identify what type of service this is (streaming, telecom, internet, utilities, etc.)
+    2. Research cheaper alternatives available in Ireland in 2025
+    3. Provide specific recommendations with prices
+    4. Include any switching considerations (contracts, setup fees, etc.)
+    
+    For different service types, consider:
+    - Streaming: Netflix vs Prime Video, Disney+, Apple TV+, etc.
+    - Mobile/Phone: Vodafone vs Three, Eir, 48, GoMo, etc.
+    - Internet: Eir vs Virgin Media, Sky, Three Broadband, etc.
+    - Utilities: Electric Ireland vs SSE Airtricity, Energia, etc.
+    - Insurance: Compare car/home insurance providers
+    - Software: Adobe vs Canva, Office vs Google Workspace, etc.
+    
+    If cheaper alternatives exist, format like:
+    "Alternative: [Provider] [Plan] at €[price]/month (save €[amount]/month). 
+    Benefits: [key benefits]
+    Considerations: [any downsides or switching costs]"
+    
+    If no cheaper alternatives exist, respond with:
+    "No known cheaper alternatives available in the Irish market. This appears to be competitively priced."
+    
+    Be specific about Irish providers and current 2025 pricing.
     """
 
     resp = _client.chat.completions.create(
         model=OPENAI_MODEL,
         messages=[
-            {"role": "system", "content": "You are a financial advisor who compares services."},
+            {"role": "system", "content": "You are a financial advisor specializing in Irish consumer services and subscriptions. You have detailed knowledge of Irish providers, pricing, and switching processes."},
             {"role": "user", "content": prompt},
         ],
         temperature=0.3,
@@ -121,17 +146,39 @@ def get_homebrew_cost(db: Session, item: str, region: str = "IE") -> Optional[fl
 
 def suggest_recipe_for(item_name: str, brand_hint: Optional[str] = None) -> Dict[str, Any]:
     """
-    LLM creates a tiny, cheap-at-home recipe card. Deterministic tone; no brand defamation.
+    AI creates a homemade alternative recipe for any purchase, with cost savings analysis.
     """
-    brand = f" (inspired by {brand_hint})" if brand_hint else ""
     prompt = f"""
-Create a concise home recipe{brand} for: {item_name}.
-Constraints:
-- Keep total ingredient cost low and list simple equipment.
-- Provide: title, ingredients (bulleted), method (3-6 short steps), est_cost_per_serving (€), time_minutes.
-- Max 120 words.
-Return pure JSON with keys: title, ingredients (array), method (array), est_cost_per_serving, time_minutes.
+You are a financial advisor who helps people save money by making things at home instead of buying them.
+
+Analyze this purchase: "{item_name}" from "{brand_hint or 'unknown merchant'}"
+
+Your task:
+1. Determine if this can reasonably be made/done at home for less cost
+2. If YES: Create a practical homemade recipe/alternative with cost savings
+3. If NO: Return a response indicating it's not suitable for homemade alternatives
+
+For homemade alternatives, provide:
+- title: Descriptive name for the homemade version
+- ingredients: List of ingredients/supplies needed (mention where to buy in Ireland like Aldi, Tesco)
+- method: 3-6 step process to make it
+- est_cost_per_serving: Realistic cost in euros for homemade version
+- time_minutes: Time needed to make it
+- is_viable: true (since you're providing a recipe)
+
+If not suitable for homemade (like services, digital purchases, etc.):
+- title: "Not suitable for homemade alternative"
+- ingredients: []
+- method: ["This purchase cannot be easily replicated at home"]
+- est_cost_per_serving: 0
+- time_minutes: 0
+- is_viable: false
+
+Be realistic about costs and time. Focus on significant savings opportunities.
+
+Return only valid JSON with keys: title, ingredients, method, est_cost_per_serving, time_minutes, is_viable
 """
+    
     schema = {
       "name":"RecipeCard",
       "schema":{
@@ -142,28 +189,31 @@ Return pure JSON with keys: title, ingredients (array), method (array), est_cost
           "ingredients":{"type":"array","items":{"type":"string"}},
           "method":{"type":"array","items":{"type":"string"}},
           "est_cost_per_serving":{"type":"number"},
-          "time_minutes":{"type":"number"}
+          "time_minutes":{"type":"number"},
+          "is_viable":{"type":"boolean"}
         },
-        "required":["title","ingredients","method","est_cost_per_serving","time_minutes"]
+        "required":["title","ingredients","method","est_cost_per_serving","time_minutes","is_viable"]
       }
     }
+    
     try:
         resp = _client.chat.completions.create(
             model=OPENAI_MODEL,
             messages=[
-                {"role":"system","content":"You write very concise, practical recipe cards as JSON only."},
+                {"role":"system","content":"You are a practical financial advisor who suggests realistic homemade alternatives to save money. Be honest about what can and cannot be made at home."},
                 {"role":"user","content": prompt}
             ],
-            temperature=0,
+            temperature=0.3,
             response_format={"type":"json_schema","json_schema":schema}
         )
         return json.loads(resp.choices[0].message.content)
     except Exception:
-        # safe fallback
+        # Safe fallback for any failures
         return {
-          "title": f"DIY {item_name}",
-          "ingredients": ["Ground coffee", "Hot water", "Milk (optional)"],
-          "method": ["Brew coffee", "Add milk to taste", "Serve immediately"],
-          "est_cost_per_serving": 0.7,
-          "time_minutes": 5
+            "title": "Homemade Alternative",
+            "ingredients": ["Various ingredients from local supermarket"],
+            "method": ["Research homemade version", "Gather ingredients", "Follow online recipe"],
+            "est_cost_per_serving": 1.00,
+            "time_minutes": 30,
+            "is_viable": True
         }

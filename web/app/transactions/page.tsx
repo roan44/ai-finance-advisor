@@ -477,7 +477,7 @@ const badgeLinkStyle: React.CSSProperties = {
   font: 'inherit',
 };
 
-// Tiny badge component (clickable when asButton)
+
 function Badge({
   children,
   tone = 'gray',
