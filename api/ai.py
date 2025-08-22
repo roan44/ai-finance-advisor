@@ -10,7 +10,6 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_PROJECT = os.getenv("OPENAI_PROJECT")  
 OPENAI_ORG_ID = os.getenv("OPENAI_ORG_ID")    
 
-# Optional Redis (safe to skip if not reachable)
 _redis: Optional[redis.Redis] = None
 try:
     _redis = redis.Redis.from_url(os.getenv("REDIS_URL", "redis://redis:6379/0"), socket_connect_timeout=0.2)
@@ -20,7 +19,6 @@ except Exception:
 
 _client: Optional[OpenAI] = None
 if OPENAI_API_KEY:
-    # Pass project (and org if set) so billing uses the right bucket
     _client = OpenAI(
         api_key=OPENAI_API_KEY,
         project=OPENAI_PROJECT,
