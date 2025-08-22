@@ -26,7 +26,6 @@ export default function AdvisorPage() {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Coffee simulator state (client-side calculation)
   const [coffeePrice, setCoffeePrice] = useState<string>('3.50');
   const [perWeek, setPerWeek] = useState<string>('5');
   const [years, setYears] = useState<string>('10');
@@ -65,7 +64,6 @@ export default function AdvisorPage() {
 
   useEffect(() => {
     fetchLatest();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [base]);
 
   // Client-side coffee simulation calculations

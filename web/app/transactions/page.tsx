@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 type Tx = {
   id: number;
   account_id: number;
-  date: string;          // ISO yyyy-mm-dd
+  date: string;          
   description: string;
   amount: number;
   merchant_raw?: string | null;
@@ -52,9 +52,9 @@ export default function Transactions() {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const list: Tx[] = await r.json();
       setRows(list);
-      // Optionally clear enrichment cache so UI shows "No enrichment yet" until lazily fetched
+
       setEnriched({});
-      // Kick off enrichment fetches (parallel)
+
       const p = list.map(async (tx) => {
         try {
           const res = await fetch(`${base}/transactions/${tx.id}/enriched`);
@@ -375,7 +375,7 @@ export default function Transactions() {
                 </div>
               </div>
 
-              {/* Enrichment display (badges are clickable to search) */}
+              {/* Enrichment display */}
               <div style={{
                 display: 'flex',
                 flexWrap: 'wrap',

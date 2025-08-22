@@ -95,11 +95,10 @@ class HomebrewCost(Base):
 # Create all tables
 Base.metadata.create_all(bind=engine)
 
-# Add some helpful startup logging
-print("🚀 AI Finance Advisor API starting up...")
-print("📊 Database tables created successfully")
-print(f"🔗 API available at: http://localhost:8000")
-print(f"📖 Docs available at: http://localhost:8000/docs")
+print("AI Finance Advisor API starting up...")
+print("Database tables created successfully")
+print(f"API available at: http://localhost:8000")
+print(f"Docs available at: http://localhost:8000/docs")
 
 # ---------- APP SETUP ----------
 app = FastAPI(title="AI Finance Advisor", version="1.0.0")
@@ -391,9 +390,8 @@ def run_advice_analysis(days: int = 90):
             est_monthly = estimate_monthly_from_window(group["total_amount"], days)
             tx_ids = [t.id for t in txs]
             
-            # SUBSCRIPTION EVALUATION - Check EVERY subscription regardless of frequency
+            # SUBSCRIPTION EVALUATION
             if sample_enriched.is_subscription:
-                # Use the actual amount for single transactions, or estimated monthly for multiple
                 monthly_cost = est_monthly if len(txs) > 1 else abs(float(sample_tx.amount))
                 
                 # Try to find cheaper alternatives
@@ -405,7 +403,7 @@ def run_advice_analysis(days: int = 90):
                     body = f"Current service: {sample_enriched.merchant or key} at €{monthly_cost:.2f}/month.\n\n{alternative}"
                     
                     # Extract potential savings from AI response (rough estimate)
-                    potential_savings = monthly_cost * 0.2  # Assume 20% savings as baseline
+                    potential_savings = monthly_cost * 0.2 
                     
                     insight = AdviceInsight(
                         kind="switch",
@@ -426,7 +424,6 @@ def run_advice_analysis(days: int = 90):
                     db.add(insight)
                     created += 1
                 else:
-                    # Even if no alternative found, still create an insight for awareness
                     title = f"Monitor {sample_enriched.merchant or key} subscription costs"
                     body = f"You pay €{monthly_cost:.2f}/month for {sample_enriched.merchant or key}. While no cheaper alternatives were found, consider reviewing this subscription periodically for better deals."
                     
@@ -449,7 +446,7 @@ def run_advice_analysis(days: int = 90):
                     db.add(insight)
                     created += 1
             
-            # FREQUENT WANT SPENDING EVALUATION (only for multiple transactions)
+            # FREQUENT WANT SPENDING
             elif sample_enriched.spending_class == "want" and len(txs) >= 3:
                 if est_monthly < 5.0:
                     continue

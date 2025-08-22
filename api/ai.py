@@ -1,9 +1,9 @@
-# api/ai.py
+
 import os, json, hashlib
 from typing import Any, Dict, Optional
 
 from openai import OpenAI, APIConnectionError, RateLimitError, BadRequestError, APITimeoutError
-import redis  # optional cache
+import redis  
 
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")

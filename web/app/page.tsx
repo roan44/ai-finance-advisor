@@ -26,14 +26,14 @@ export default function Home() {
       .catch(() => setHealth('down'));
   }, [base]);
 
-  // Load quick stats (we'll build this endpoint)
+  
   useEffect(() => {
     loadStats();
   }, [base]);
 
   async function loadStats() {
     try {
-      // For now, we'll call existing endpoints to build stats
+      
       const [txResponse, adviceResponse] = await Promise.all([
         fetch(`${base}/transactions?limit=1000`),
         fetch(`${base}/advice/latest?limit=1000`)
@@ -47,7 +47,7 @@ export default function Home() {
         const enrichedCount = transactions.filter((tx: any) => tx.enriched).length;
         const recentSpending = transactions
           .filter((tx: any) => tx.amount < 0) // negative amounts are spending
-          .slice(0, 30) // last 30 transactions
+          .slice(0, 30)
           .reduce((sum: number, tx: any) => sum + Math.abs(tx.amount), 0);
 
         setStats({
