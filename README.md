@@ -18,7 +18,7 @@ Tech Stack:
   - Infrastructure: Docker & Docker Compose
 
 How to Run:
-  - Clone the repository: git clone https://github.com/roan44./ai-finance-advisor.git
+  - Clone the repository: git clone https://github.com/roan44/ai-finance-advisor.git
                           cd ai-finance-advisor
   - Start services with Docker: docker compose up --build
   - Open application in browser: http://localhost:3000/transactions
