@@ -27,4 +27,4 @@ How to Run:
 Usage:
   - Add transactions through web app
   - Click enrich to categorize transactions with AI
-  - Not yet ready but working on /advisor page for generation of personalised financial insights
+  - /advisor page for generation of personalised financial insights about subscriptions and consistent expenditure on "wants"
